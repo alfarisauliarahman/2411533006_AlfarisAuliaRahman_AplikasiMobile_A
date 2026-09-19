@@ -4,118 +4,168 @@ void main() {
   runApp(const MyApp());
 }
 
+// 1. WIDGET UTAMA
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Expense Tracker',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const DashboardScreen(), // Halaman awal aplikasi
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+// 2. HALAMAN UTAMA (Scaffold)
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Praktikum 1: Widgets'),
+        backgroundColor: Colors.blue,
+      ),
+      // pAdding untuk memberikan jarak dari tepi layar
+      body: const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment:CrossAxisAlignment.start,
+          children: [
+            GreetingWidget(),   // Memanggil StatelessWidget
+            SizedBox(height: 20.0), // Jarak Vertikal
+            BalanceCardWidget(), // Memanggil StatefulWidget
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+// 3. STATELESS WIDGET (Sapaan Pengguna)
 
-  void _incrementCounter() {
+class GreetingWidget extends StatelessWidget {
+  const GreetingWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        // Ikon Profil
+        CircleAvatar(
+          radius: 24,
+          backgroundColor: Colors.blueAccent,
+          child: Icon(Icons.person, size: 30, color: Colors.white),
+        ),
+        SizedBox(width: 12.0),
+        // Teks Sapaan
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Halo, Budi',
+              style: TextStyle(
+                fontSize: 16, 
+                fontWeight: FontWeight.bold
+                ),
+            ),
+            Text(
+              'Selamat datang kembali!',
+              style: TextStyle(
+                fontSize: 20, 
+                color: Colors.grey
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// 4. STATEFUL WIDGET (Kartu Saldo dengan Toggle)
+
+class BalanceCardWidget extends StatefulWidget {
+  const BalanceCardWidget({super.key});
+
+  @override
+  _BalanceCardWidgetState createState() => _BalanceCardWidgetState();
+}
+
+class _BalanceCardWidgetState extends State<BalanceCardWidget> {
+  // Variabel State: Menyimpan status apakah saldo terlihat atau disensor
+  bool _isBalanceVisible = true;
+
+  // Fungsi untuk mengubah state
+  void _toggleVisibility() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _isBalanceVisible = !_isBalanceVisible; // Membalik nilai boolean (true <-> false)
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      color: Colors.teal, // Warna latar belakang kartu
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            // Baris atau kartu: Teks "Saldo Utama" & Tombol Ikon
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Saldo Utama',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                  ),
+                ),
+                // Tombol Mata
+                IconButton(
+                  icon: Icon(
+                    // Logika if-else singkat (Ternary Operator)
+                    _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.white,
+                  ),
+                  onPressed: _toggleVisibility, // Memanggil fungsi untuk state
+                ),
+              ],
             ),
+            const SizedBox(height: 8),
+            // Teks Nominal Saldo
+            Text(
+              // Lofika if-else untuk menampilkan saldo atau sendor
+              _isBalanceVisible ? 'Rp 5.000.000' : 'Rp *********',
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            Text(
+              'No. Rekening: 1234-5678-9012-345',
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white70,
+              ),
+            )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
