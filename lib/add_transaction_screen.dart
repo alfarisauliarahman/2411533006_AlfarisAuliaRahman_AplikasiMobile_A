@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'date_input.dart';
-
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
 
@@ -10,61 +8,44 @@ class AddTransactionScreen extends StatefulWidget {
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
-  // GlobalKey untuk mengontrol form dan memicu validasi
   final _formKey = GlobalKey<FormState>();
-
-  // Controller untuk mengambil teks dari input
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _dateController = TextEditingController();
 
-  // State untuk Dropdown
-  String _selectedCategory = 'Makanan';
-  final List<String> _categories = [
-    'Makanan',
-    'Transportasi',
-    'Hiburan',
-    'Lainnya',
-  ];
+  Future<void> _pickDate() async {
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (!mounted) return;
+    if (selectedDate != null) {
+      _dateController.text =
+          '${selectedDate.day.toString().padLeft(2, '0')}/'
+          '${selectedDate.month.toString().padLeft(2, '0')}/'
+          '${selectedDate.year}';
+    }
+  }
 
   @override
   void dispose() {
-    // Bersihkan controller saat halaman ditutup untuk mencegah memory leak
     _titleController.dispose();
     _amountController.dispose();
     _dateController.dispose();
     super.dispose();
   }
 
-  Future<void> _pickDate() async {
-    FocusScope.of(context).unfocus();
-    final selected = await showDatePicker(
-      context: context,
-      initialDate: parseTransactionDate(_dateController.text) ?? DateTime.now(),
-      firstDate: DateTime(1),
-      lastDate: DateTime(9999, 12, 31),
-      helpText: 'Pilih tanggal transaksi',
-      cancelText: 'Batal',
-      confirmText: 'Pilih',
-    );
-    if (!mounted || selected == null) return;
-    final text = formatTransactionDate(selected);
-    _dateController.value = TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: text.length),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Catat Transaksi Baru"),
-        backgroundColor: Colors.deepPurple,
+        title: const Text("Catat Transaksi"),
+        backgroundColor: Colors.red,
         foregroundColor: Colors.white,
       ),
-
-      // SingleChildScrollView mencegah error layout saat keyboard muncul
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -72,127 +53,69 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Input 1: Judul Transaksi
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
-                  labelText: "Judul Transaksi",
+                  labelText: "Judul",
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.title),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Judul transaksi tidak boleh kosong";
-                  }
-                  return null;
-                },
+                validator: (value) =>
+                    value!.isEmpty ? "Tidak boleh kosong" : null,
               ),
 
               const SizedBox(height: 16),
-
-              // Input 2: Nominal Saldo (Keyboard Angka)
               TextFormField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: "Nominal (Rp)",
+                  labelText: "Nominal",
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.attach_money),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Nominal wajib diisi";
-                  }
-
-                  if (int.tryParse(value) == null) {
-                    return "Harus berupa angka bulat yang valid";
-                  }
-
-                  return null;
-                },
+                validator: (value) =>
+                    value!.isEmpty ? "Tidak boleh kosong" : null,
               ),
 
               const SizedBox(height: 16),
-
-              // Input 3: Kategori Dropdown
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: "Kategori",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.category),
-                ),
-                items: _categories.map((String category) {
-                  return DropdownMenuItem<String>(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedCategory = newValue!;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              // Input 4: Tanggal Transaksi
+              // Tanggal
               TextFormField(
                 controller: _dateController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [TransactionDateFormatter()],
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+                keyboardType: TextInputType.datetime,
                 decoration: InputDecoration(
-                  labelText: "Tanggal Transaksi",
-                  hintText: "DD/MM/YYYY",
+                  labelText: 'Tanggal Transaksi',
+                  hintText: 'DD/MM/YYYY',
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.calendar_today),
                   suffixIcon: IconButton(
-                    tooltip: 'Pilih tanggal transaksi',
                     icon: const Icon(Icons.date_range),
+                    tooltip: 'Pilih tanggal',
                     onPressed: _pickDate,
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Tanggal transaksi wajib diisi";
-                  }
-                  if (!RegExp(r'^\d{2}/\d{2}/\d{4}$').hasMatch(value)) {
-                    return 'Gunakan format DD/MM/YYYY';
-                  }
-                  if (parseTransactionDate(value) == null) {
-                    return 'Tanggal transaksi tidak valid';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Tanggal transaksi wajib diisi'
+                    : null,
               ),
 
               const SizedBox(height: 32),
-
-              // Tombol Simpan
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: () {
-                  // Jalankan validasi
                   if (_formKey.currentState!.validate()) {
-                    // Jika lolos validasi, tampilkan pop-up SnackBar sukses
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Tersimpan: ${_titleController.text} (Rp ${_amountController.text})',
-                        ),
+                      const SnackBar(
+                        content: Text('Transaksi Berhasil Disimpan!'),
                         backgroundColor: Colors.green,
                       ),
                     );
+                    // NAVIGAS POP: Kembali ke halaman sebelumnya (Dashboard)
+                    Navigator.pop(context);
                   }
                 },
-                child: const Text(
-                  "Simpan Transaksi",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                child: const Text("Simpan", style: TextStyle(fontSize: 16)),
               ),
             ],
           ),
