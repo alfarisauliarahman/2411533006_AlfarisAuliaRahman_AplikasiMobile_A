@@ -1,67 +1,113 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:praktikum_satu/main.dart' as app;
-import 'package:praktikum_satu/transaction_detail_screen.dart';
+import 'package:praktikum_6/main.dart';
+
+Future<void> login(WidgetTester tester, String email) async {
+  await tester.enterText(find.widgetWithText(TextFormField, 'Email'), email);
+  await tester.enterText(
+    find.widgetWithText(TextFormField, 'Password'),
+    'password123',
+  );
+  await tester.tap(find.widgetWithText(ElevatedButton, 'Login'));
+  await tester.pumpAndSettle();
+}
 
 void main() {
-  testWidgets('push passes transaction values and back restores dashboard', (
+  testWidgets('Login memvalidasi email dan password', (tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+    expect(find.text('Dashboard Keuangan'), findsNothing);
+    expect(Navigator.of(tester.element(find.byType(Form))).canPop(), isFalse);
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Login'));
+    await tester.pumpAndSettle();
+    expect(find.text('Email wajib diisi'), findsOneWidget);
+    expect(find.text('Password wajib diisi'), findsOneWidget);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Email'),
+      'bukan-email',
+    );
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Login'));
+    await tester.pumpAndSettle();
+    expect(find.text('Masukkan email yang valid'), findsOneWidget);
+    expect(find.text('Dashboard Keuangan'), findsNothing);
+  });
+
+  testWidgets('Login, navigasi, detail, form, profil, dan logout', (
     tester,
   ) async {
-    await tester.pumpWidget(const app.MyApp());
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+    await login(tester, 'budi@example.com');
+
+    expect(find.text('Dashboard Keuangan'), findsOneWidget);
+    expect(find.text('budi@example.com'), findsOneWidget);
+    expect(
+      Navigator.of(tester.element(find.byType(BottomNavigationBar))).canPop(),
+      isFalse,
+    );
+
+    await tester.tap(find.text('Riwayat'));
+    await tester.pumpAndSettle();
+    expect(find.text('Riwayat Transaksi'), findsOneWidget);
+    expect(find.text('Makan Siang'), findsOneWidget);
+    expect(find.text('Gaji Bulanan'), findsOneWidget);
+
     await tester.tap(find.text('Makan Siang'));
     await tester.pumpAndSettle();
-    final detail = tester.widget<TransactionDetailScreen>(
-      find.byType(TransactionDetailScreen),
-    );
-    expect(detail.title, 'Makan Siang');
-    expect(detail.amount, '- Rp 50.000');
-    expect(detail.category.trim(), 'Makanan');
-    expect(detail.date, '13 September 2026');
-    await tester.tap(find.byType(BackButton));
+    expect(find.text('Detail Transaksi'), findsOneWidget);
+    expect(find.text('Makanan'), findsOneWidget);
+    expect(find.text('13 September 2026'), findsOneWidget);
+    await tester.pageBack();
     await tester.pumpAndSettle();
-    expect(find.text('Dashboard Keuangan'), findsOneWidget);
-    await tester.tap(find.text('Gaji Bulanan'));
+    expect(find.text('Riwayat Transaksi'), findsOneWidget);
+
+    await tester.tap(find.text('Beranda'));
     await tester.pumpAndSettle();
-    expect(
-      tester
-          .widget<TransactionDetailScreen>(find.byType(TransactionDetailScreen))
-          .amount,
-      '+ Rp 5.000.000',
-    );
-  });
-  testWidgets('required date blocks pop; valid form returns with snackbar', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const app.MyApp());
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'Internet');
-    await tester.enterText(fields.at(1), '120000');
-    FocusManager.instance.primaryFocus?.unfocus();
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Simpan'));
-    await tester.tap(find.text('Simpan'));
-    await tester.pumpAndSettle();
-    expect(find.text('Tanggal transaksi wajib diisi'), findsOneWidget);
     expect(find.text('Catat Transaksi'), findsOneWidget);
-    await tester.tap(find.byTooltip('Pilih tanggal'));
-    await tester.pumpAndSettle();
-    expect(find.byType(DatePickerDialog), findsOneWidget);
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
     expect(
-      tester.widget<TextFormField>(fields.at(2)).controller!.text,
-      matches(RegExp(r'^\d{2}/\d{2}/\d{4}$')),
+      ModalRoute.of(tester.element(find.byType(Form)))?.settings.name,
+      '/add',
     );
-    await tester.enterText(fields.at(2), '03/10/2026');
-    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Simpan'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Simpan'));
-    await tester.tap(find.text('Simpan'));
+    expect(find.text('Tidak boleh kosong'), findsNWidgets(2));
+    expect(find.text('Tanggal transaksi wajib diisi'), findsOneWidget);
+    await tester.enterText(find.widgetWithText(TextFormField, 'Judul'), 'Buku');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Nominal'),
+      '25000',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Tanggal Transaksi'),
+      '23/10/2026',
+    );
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Simpan'));
     await tester.pumpAndSettle();
     expect(find.text('Dashboard Keuangan'), findsOneWidget);
     expect(find.text('Transaksi Berhasil Disimpan!'), findsOneWidget);
-    expect(find.text('Internet'), findsNothing);
+
+    await tester.tap(find.text('Profil'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CircleAvatar), findsOneWidget);
+    expect(find.text('Budi'), findsOneWidget);
+    expect(find.text('budi@example.com'), findsOneWidget);
+    await tester.tap(find.text('Logout'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextFormField), findsNWidgets(2));
+    expect(find.byType(BottomNavigationBar), findsNothing);
+    expect(find.text('budi@example.com'), findsNothing);
+    expect(Navigator.of(tester.element(find.byType(Form))).canPop(), isFalse);
+
+    await login(tester, 'siti@example.com');
+    expect(find.text('siti@example.com'), findsOneWidget);
+    expect(find.text('budi@example.com'), findsNothing);
+    await tester.tap(find.text('Profil'));
+    await tester.pumpAndSettle();
+    expect(find.text('siti@example.com'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

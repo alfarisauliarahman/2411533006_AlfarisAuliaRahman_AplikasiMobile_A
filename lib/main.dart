@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'dashboard_screen.dart';
+import 'main_screen.dart';
+import 'add_transaction_screen.dart';
+import 'login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,9 +15,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Expense Tracker Modul - 4',
-      theme: ThemeData(primaryColor: Colors.red),
-      home: const DashboardScreen(), // Halaman pertama yang dimuat
+      title: 'Expense Tracker Final',
+      theme: ThemeData(primarySwatch: Colors.amber),
+      // MENGGUNAKAN NAMED ROUTES
+      initialRoute: '/login',
+      // Mulai dari login tanpa menumpuk halaman utama di belakangnya.
+      onGenerateInitialRoutes: (initialRoute) => [
+        MaterialPageRoute(
+          settings: RouteSettings(name: initialRoute),
+          builder: (context) => const LoginScreen(),
+        ),
+      ],
+      routes: {
+        '/': (context) => const MainScreen(),
+        '/add': (context) => const AddTransactionScreen(),
+        '/login': (context) => const LoginScreen(),
+      },
     );
   }
 }

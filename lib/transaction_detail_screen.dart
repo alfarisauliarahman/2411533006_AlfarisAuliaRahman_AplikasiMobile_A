@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class TransactionDetailScreen extends StatelessWidget {
+class TransactionDetailScreen extends StatelessWidget{
   // Deklarasi variabel penampung data (harus final karena StatelessWidget)
   final String title;
   final String amount;
@@ -20,7 +20,7 @@ class TransactionDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Detail Transaksi"),
+        title:const Text("Detail Transaksi"),
         backgroundColor: Colors.red,
         foregroundColor: Colors.white,
       ),
@@ -31,19 +31,9 @@ class TransactionDetailScreen extends StatelessWidget {
           children: [
             const Icon(Icons.receipt_long, size: 80, color: Colors.redAccent),
             const SizedBox(height: 24),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text(
-              amount,
-              style: const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
-              ),
-            ),
+            Text(amount,style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.red)),
             const Divider(height: 40, thickness: 2),
             _buildDetailRow('Kategori', category),
             const SizedBox(height: 16),
@@ -62,10 +52,7 @@ class TransactionDetailScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: const TextStyle(fontSize: 16, color: Colors.grey)),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
+        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }

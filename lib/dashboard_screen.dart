@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'add_transaction_screen.dart';
 import 'transaction_detail_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -8,6 +7,7 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final email = ModalRoute.of(context)?.settings.arguments as String? ?? '';
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard Keuangan'),
@@ -16,17 +16,11 @@ class DashboardScreen extends StatelessWidget {
       ),
       // Tombol mengambang (FAB) untuk tambah transaksi
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.red,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.amber,
         child: const Icon(Icons.add),
         onPressed: () {
-          // NAVIGAS PUSH: Berppindah ke halaman FOrm
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddTransactionScreen(),
-            ),
-          );
+          // Memanggil Rute yang sudah didaftarkan di main.dart
+          Navigator.pushNamed(context, '/add');
         },
       ),
       body: SingleChildScrollView(
@@ -38,6 +32,8 @@ class DashboardScreen extends StatelessWidget {
               'Halo, Budi',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 8),
+            Text(email),
             const SizedBox(height: 20),
             _buildBalanceCard(),
             const SizedBox(height: 20),
