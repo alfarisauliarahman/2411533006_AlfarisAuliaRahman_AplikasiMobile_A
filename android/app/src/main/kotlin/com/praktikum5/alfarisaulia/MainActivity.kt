@@ -1,4 +1,4 @@
-package com.example.praktikum_6
+package com.praktikum5.alfarisaulia
 
 import io.flutter.embedding.android.FlutterActivity
 

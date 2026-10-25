@@ -46,3 +46,14 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Local artifacts and application databases
+/output/
+/backups/
+*.apk
+*.aab
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
